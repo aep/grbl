@@ -40,6 +40,10 @@ void spindle_init()
     SPINDLE_DIRECTION_DDR |= (1<<SPINDLE_DIRECTION_BIT); // Configure as output pin.
   #endif
   spindle_stop();
+
+
+//TODO
+  spindle_set_state(SPINDLE_ENABLE_CW, 200.0);
 }
 
 
@@ -65,6 +69,10 @@ void spindle_stop()
 }
 
 
+#define RC_SERVO_SHORT     15       // Timer ticks for 0.6ms pulse duration  (9 for 0.6ms)
+#define RC_SERVO_LONG      32       // Timer ticks for 2.5 ms pulse duration  (39 for 2.5ms)     
+
+
 void spindle_set_state(uint8_t state, float rpm)
 {
   // Halt or set spindle direction and rpm. 
@@ -73,6 +81,16 @@ void spindle_set_state(uint8_t state, float rpm)
     spindle_stop();
 
   } else {
+
+      TCCR0A = _BV(COM0A1) | _BV(COM0B1) | _BV(WGM01) | _BV(WGM00);
+      TCCR0B = _BV(CS00);
+      OCR0A  = 200;
+      OCR0B  = 200;
+
+      SPINDLE_ENABLE_PORT |= (1<<SPINDLE_ENABLE_BIT);
+      return;
+
+
 
     #ifndef USE_SPINDLE_DIR_AS_ENABLE_PIN
       if (state == SPINDLE_ENABLE_CW) {
@@ -91,17 +109,21 @@ void spindle_set_state(uint8_t state, float rpm)
         uint16_t current_pwm;
       #else
         TCCRA_REGISTER = (1<<COMB_BIT) | (1<<WAVE1_REGISTER) | (1<<WAVE0_REGISTER);
-        TCCRB_REGISTER = (TCCRB_REGISTER & 0b11111000) | 0x02; // set to 1/8 Prescaler
+        TCCRB_REGISTER = (TCCRB_REGISTER & 0b11111000) | 0x07; // set to 1/1024 Prescaler
         uint8_t current_pwm;
       #endif
 
+      #define RC_SERVO_RANGE (RC_SERVO_LONG-RC_SERVO_SHORT)
       #define SPINDLE_RPM_RANGE (SPINDLE_MAX_RPM-SPINDLE_MIN_RPM)
       if ( rpm < SPINDLE_MIN_RPM ) { rpm = 0; } 
       else { 
         rpm -= SPINDLE_MIN_RPM; 
         if ( rpm > SPINDLE_RPM_RANGE ) { rpm = SPINDLE_RPM_RANGE; } // Prevent integer overflow
       }
-      current_pwm = floor( rpm*(PWM_MAX_VALUE/SPINDLE_RPM_RANGE) + 0.5);
+
+      current_pwm = floor( rpm*(RC_SERVO_RANGE/SPINDLE_RPM_RANGE) + RC_SERVO_SHORT);
+      OCR_REGISTER = current_pwm;
+
       #ifdef MINIMUM_SPINDLE_PWM
         if (current_pwm < MINIMUM_SPINDLE_PWM) { current_pwm = MINIMUM_SPINDLE_PWM; }
       #endif
