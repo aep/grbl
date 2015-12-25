@@ -30,15 +30,16 @@
 #define GRBL_PLATFORM "Atmega328p"
 
 
-#define ST1_TIMSK  TIMSK0
-#define ST1_OCIEB  OCIE0B
-#define ST1_OCIEA  OCIE0A
-#define ST1_TOIE   TOIE0
-#define ST1_TCCRA  TCCR0A
-#define ST1_TCCRA  TCCR0A
-#define ST1_TCCRB  TCCR0B
-#define ST1_CS1    CS01
-#define ST1_TCNT   TCNT0
+#define ST1_TIMSK  TIMSK2
+#define ST1_OCIEB  OCIE2B
+#define ST1_OCIEA  OCIE2A
+#define ST1_TOIE   TOIE2
+#define ST1_TCCRA  TCCR2A
+#define ST1_TCCRA  TCCR2A
+#define ST1_TCCRB  TCCR2B
+#define ST1_CS1    CS21
+#define ST1_TCNT   TCNT2
+#define ST1_OVF_vect TIMER2_OVF_vect
 
 // Define serial port pins and interrupt vectors.
 #define SERIAL_RX     USART_RX_vect
@@ -77,7 +78,7 @@
 #define LIMIT_PORT       PORTC
 #define X_LIMIT_BIT      3  // Uno Digital Pin A3 // Orion Port 6
 #define Y_LIMIT_BIT      2  // Uno Digital Pin A2 // Orion Port 6
-#define Z_LIMIT_BIT	     8 // Uno Digital Pin
+#define Z_LIMIT_BIT	     6  // Uno Digital Pin A6
 #define C_LIMIT_BIT      9
 #define LIMIT_MASK       ((1<<X_LIMIT_BIT)|(1<<Y_LIMIT_BIT)|(1<<Z_LIMIT_BIT)) // All limit bits
 #define LIMIT_INT        PCIE1  // Pin change interrupt enable pin
@@ -90,8 +91,9 @@
 // a later date if flash and memory space allows.
 #define COOLANT_FLOOD_DDR   DDRC
 #define COOLANT_FLOOD_PORT  PORTC
-#define COOLANT_FLOOD_BIT   16
+#define COOLANT_FLOOD_BIT   0
 #ifdef ENABLE_M7 // Mist coolant disabled by default. See config.h to enable/disable.
+  #error "wah wah"
   #define COOLANT_MIST_DDR   DDRC
   #define COOLANT_MIST_PORT  PORTC
   #define COOLANT_MIST_BIT  8
@@ -127,7 +129,7 @@
 // Define spindle enable and spindle direction output pins.
 #define SPINDLE_ENABLE_DDR    DDRD
 #define SPINDLE_ENABLE_PORT   PORTD
-#define SPINDLE_ENABLE_BIT    6  // Uno Digital Pin 6 // Hacked to 2 Orion Port 4
+#define SPINDLE_ENABLE_BIT    5  // Uno Digital Pin 6 // Hacked to 2 Orion Port 4
 #ifndef USE_SPINDLE_DIR_AS_ENABLE_PIN
     #error "wah wah"
 //  #define SPINDLE_DIRECTION_DDR   DDRD
@@ -144,7 +146,7 @@
   #define TCCRB_REGISTER	 TCCR0B
   #define OCR_REGISTER       OCR0B
 
-  #define COMB_BIT	         COM0A1
+  #define COMB_BIT	         COM0B1
   #define WAVE0_REGISTER	 WGM00
   #define WAVE1_REGISTER	 WGM01
   #define WAVE2_REGISTER	 WGM02
